@@ -1,12 +1,13 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <exception>  
 
 using namespace std;
 
-/////////////////////
-// Product classes //
-/////////////////////
+
+// Product Classes
+
 
 class Product
 {
@@ -220,9 +221,9 @@ public:
     }
 };
 
-/////////////////////
-// Order & Cart    //
-/////////////////////
+
+// Order and Cart classes
+
 
 struct OrderItem
 {
@@ -244,7 +245,7 @@ struct Order
 class Cart
 {
 public:
-    vector<pair<Product*,int>> items; // product pointer + qty
+    vector<pair<Product*,int>> items;
 
     void addItem(Product* p,int qty)
     {
@@ -266,7 +267,6 @@ public:
             return;
         }
 
-        // reserve stock
         p->stock-=qty;
 
         for(int i=0;i<(int)items.size();i++)
@@ -289,7 +289,6 @@ public:
         {
             if(items[i].first->id==id)
             {
-                // restore stock
                 items[i].first->stock+=items[i].second;
 
                 items.erase(items.begin()+i);
@@ -410,7 +409,6 @@ public:
 
         ord.total=total;
 
-        // clear cart after order
         items.clear();
 
         cout<<"Order placed. Payment status:"<<ord.paymentStatus<<"\n";
@@ -419,9 +417,9 @@ public:
     }
 };
 
-/////////////////////
-// Admin class     //
-/////////////////////
+
+// Admin clases
+
 
 class Admin
 {
@@ -437,17 +435,14 @@ public:
 
     void preload()
     {
-        // Electronics
         catalog.push_back(new Laptop(nextID++,"Dell XPS",120000,5,"Dell",16,512));
         catalog.push_back(new Laptop(nextID++,"HP Pavilion",65000,3,"HP",8,256));
         catalog.push_back(new Mobile(nextID++,"Phone Z",35000,10,"PhoneCo","Android"));
 
-        // Food
         catalog.push_back(new Food(nextID++,"Apples",80,100,"Fruit","2026-01-01"));
         catalog.push_back(new Food(nextID++,"Chips",40,200,"Packaged","2026-06-01"));
         catalog.push_back(new Food(nextID++,"Milk Packet",50,150,"Packaged","2025-12-31"));
 
-        // Clothing
         catalog.push_back(new Clothing(nextID++,"T-Shirt",399,50,"M","Blue"));
         catalog.push_back(new Clothing(nextID++,"Jeans",999,20,"L","Black"));
         catalog.push_back(new Clothing(nextID++,"Sneakers",2499,15,"42","White"));
@@ -630,9 +625,9 @@ public:
     }
 };
 
-///////////////////////
-// Menus             //
-///////////////////////
+
+// Menus             
+
 
 void adminMenu(Admin &admin)
 {
@@ -755,37 +750,56 @@ void customerMenu(Admin &admin)
     }
 }
 
+
 int main()
 {
-    Admin admin;
-    admin.preload();
-
-    while(true)
+    try
     {
-        cout<<"\n=== MAIN MENU ===\n";
-        cout<<"1.Customer\n";
-        cout<<"2.Admin\n";
-        cout<<"3.Exit\n";
-        cout<<"Enter:";int choice;cin>>choice;cin.ignore();
+        Admin admin;
+        admin.preload();
 
-        if(choice==1)
+        while(true)
         {
-            customerMenu(admin);
+            cout<<"\n=== MAIN MENU ===\n";
+            cout<<"1.Customer\n";
+            cout<<"2.Admin\n";
+            cout<<"3.Exit\n";
+            cout<<"Enter:";int choice;cin>>choice;cin.ignore();
+
+            if(choice==1)
+            {
+                customerMenu(admin);
+            }
+            else if(choice==2)
+            {
+                adminMenu(admin);
+            }
+            else if(choice==3)
+            {
+                break;
+            }
+            else
+            {
+                cout<<"Error:Invalid choice.\n";
+            }
         }
-        else if(choice==2)
-        {
-            adminMenu(admin);
-        }
-        else if(choice==3)
-        {
-            break;
-        }
-        else
-        {
-            cout<<"Error:Invalid choice.\n";
-        }
+
+        cout<<"Exiting...\n";
+        return 0;
     }
 
-    cout<<"Exiting...\n";
-    return 0;
+    catch (const bad_alloc &e)
+    {
+        cerr<<"\nFATAL ERROR: Memory allocation failed!\n";
+        cerr<<"Details: "<<e.what()<<"\n";
+    }
+    catch (const exception &e)
+    {
+        cerr<<"\nUnexpected error occurred!\n";
+        cerr<<"Details: "<<e.what()<<"\n";
+    }
+    catch (...)
+    {
+        cerr<<"\nUnknown fatal error occurred!\n";
+    }
 }
